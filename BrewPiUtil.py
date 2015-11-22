@@ -19,6 +19,7 @@ import sys
 import os
 import serial
 import autoSerial
+import logging
 
 try:
     import configobj
@@ -26,6 +27,8 @@ except ImportError:
     print "BrewPi requires ConfigObj to run, please install it with 'sudo apt-get install python-configobj"
     sys.exit(1)
 
+logging.basicConfig(format='%(levelname)s -\t[%(asctime)15s]\t%(message)s', level=logging.INFO)
+logger = logging.getLogger('brewpi')
 
 def addSlash(path):
     """
@@ -80,12 +83,11 @@ def configSet(configFile, settingName, value):
     return readCfgWithDefaults(configFile)  # return updated ConfigObj
 
 
-def logMessage(message):
+def logMessage(message, level=logging.INFO):
     """
     Prints a timestamped message to stderr
     """
-    print >> sys.stderr, time.strftime("%b %d %Y %H:%M:%S   ") + message
-
+    logger.log(level, message)
 
 def scriptPath():
     """
@@ -142,7 +144,7 @@ def setupSerial(config, baud_rate=57600, time_out=0.1):
         ser.flushInput()
         ser.flushOutput()
     else:
-         logMessage("Errors while opening serial port: \n" + error)
+         logMessage("Errors while opening serial port: \n" + error, level=logging.ERROR)
 
     # yes this is monkey patching, but I don't see how to replace the methods on a dynamically instantiated type any other way
     if dumpSerial:
